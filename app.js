@@ -1,3 +1,6 @@
+const config = require("./config.json");
+const dateFormat = require("dateformat");
+const winston = require("winston");
 const events = require("events");
 const express = require("express");
 const http = require("http");
@@ -8,29 +11,113 @@ const appPort = 3000;		// Port the express app should listen on
 const hueIP = "192.168.1.49";		// IP address of the Hue bridge
 const hueUsername = "PlX16CEbg1u5iyZuxc-kie1cMPDbGn0-6zaKBGge";		// Username to use with the Hue API
 
-const users = [];
-users[0] = {
-	id: "cfb78822e5f14e078dbd9e5ed3be35a3",
-	name: "Justin",
-	state: "home"
-};
-users[1] = {
-	id: "c4bac848d6644c229b6b712630466a99",
-	name: "Jannette",
-	state: "home"
+// const users = [];
+// users[0] = {
+// 	id: "cfb78822e5f14e078dbd9e5ed3be35a3",
+// 	name: "Justin",
+// 	state: "home"
+// };
+// users[1] = {
+// 	id: "c4bac848d6644c229b6b712630466a99",
+// 	name: "Jannette",
+// 	state: "home"
+// }
+
+// Initialize the logger - logger will always begin with console logging, if the app is configured not to log it will be shut off later
+const logger = new winston.Logger({
+	level: "debug",
+	transports: [
+		new (winston.transports.Console)({
+			timestamp: function() {
+				return dateFormat(Date.now(), "HH:MM:ss");
+			},
+			formatter: function(options) {
+				// Return string will be passed to logger.
+				return options.timestamp() +' '+ options.level.toUpperCase() +' '+ (options.message ? options.message : '') +
+				(options.meta && Object.keys(options.meta).length ? '\n\t'+ JSON.stringify(options.meta) : '' );
+			}
+		})
+	]
+});
+
+// Configure the logger as per settings in the app configuration
+if ((config.hasOwnProperty("logging") && config.logging.hasOwnProperty("enabled") && !config.logging.enabled) || !config.hasOwnProperty("logging"))
+{
+	logger.info("Disabling logging as per configuration");
+
+	// Remove the console logger
+	logger.remove(winston.transports.Console);
+}
+else {
+	// Check if we should be logging to console
+	if (config.hasOwnProperty("logging") && config.logging.hasOwnProperty("consoleLogging") && config.logging.consoleLogging)
+	{
+		// Override the default console level if specified
+		if (config.hasOwnProperty("logging") && config.logging.hasOwnProperty("consoleLoggingLevel"))
+		{
+			logger.info(`Setting console logging level to ${config.logging.consoleLoggingLevel} as per configuration`);
+
+			// Just remove the console logger and readd it, seems simplest
+			logger.remove(winston.transports.Console)
+			.add(winston.transports.Console, {
+				level: config.logging.consoleLoggingLevel,
+				timestamp: function() {
+						return dateFormat(Date.now(), "HH:MM:ss");
+					},
+					formatter: function(options) {
+						// Return string will be passed to logger.
+						return options.timestamp() +' '+ options.level.toUpperCase() +' '+ (options.message ? options.message : '') +
+						(options.meta && Object.keys(options.meta).length ? '\n\t'+ JSON.stringify(options.meta) : '' );
+					}
+				}
+			);
+		}
+	}
+
+	// Check if we should enable file logging
+	if (config.hasOwnProperty("logging") && config.logging.hasOwnProperty("fileLogging") && config.logging.fileLogging)
+	{
+		// Check for a logging level override; default otherwise
+		var fileLoggingLevel = (config.hasOwnProperty("logging") && config.logging.hasOwnProperty("fileLoggingLevel")) ? config.logging.fileLoggingLevel : "info";
+
+		// Check for a log filename override; default otherwise
+		var fileLoggingFile = (config.hasOwnProperty("logging") && config.logging.hasOwnProperty("fileLoggingFile")) ? config.logging.fileLoggingFile : "log.txt";
+
+		logger.info(`Enabling file logging at level ${fileLoggingLevel} to file ${fileLoggingFile}`);
+
+		// Add a file logger
+		logger.add(winston.transports.File, {
+			level: fileLoggingLevel,
+			filename: fileLoggingFile,
+			json: false,
+			timestamp: function() {
+				return dateFormat(Date.now(), "HH:MM:ss");
+			},
+			formatter: function(options) {
+				// Return string will be passed to logger.
+				return options.timestamp() +' '+ options.level.toUpperCase() +' '+ (options.message ? options.message : '') +
+				(options.meta && Object.keys(options.meta).length ? '\n\t'+ JSON.stringify(options.meta) : '' );
+			}
+		});
+	}
+
+	logger.info(`Application finished initializing at ${dateFormat(Date.now(), "d mmm yyyy HH:MM:ss")}, beginning normal operation.`);
 }
 
-// Basic test route
+// DEFINE ROUTES
+// Basic test route, verifies that the application is working
 app.get('/', function (req, res) {
 	res.send('Hello World!')
 })
 
+// Retrieve current status of users
 app.get('/users', (req, res) => {
 	res.send(users);
 });
 
-// Mark a user as arriving at home
+// Update a user's state
 app.put('/user/:userId/:state', function (req, res) {
+	
 	console.log(`Updating user with user ID ${req.params.userId}`)
 
 	// Test that we recognize the userId
@@ -68,13 +155,13 @@ app.put('/user/:userId/:state', function (req, res) {
 
 	// Send a response
 	res.send("OK");
-})
+});
+// END DEFINE ROUTES
 
+// Start Express
 app.listen(appPort, function () {
-	console.log(`Example app listening on port ${appPort}!`)
+	logger.info(`Express listening for connections on port ${config.application.port}`);
 })
-
-console.log("Application started");
 
 eventEmitter.on("userStateChanged", (user, oldState, newState) => {
 	console.log(`DEBUG: userStateChanged event fired with params: user = ${JSON.stringify(user)}, oldState = ${oldState}, newState = ${newState}`);

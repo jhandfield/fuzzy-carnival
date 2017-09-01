@@ -20,5 +20,9 @@
   "bugs": {
     "url": "https://github.com/jhandfield/fuzzy-carnival/issues"
   },
-  "homepage": "https://github.com/jhandfield/fuzzy-carnival#readme"
+  "homepage": "https://github.com/jhandfield/fuzzy-carnival#readme",
+  "dependencies": {
+    "dateformat": "^2.0.0",
+    "winston": "^2.3.1"
+  }
 }

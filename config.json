@@ -1,0 +1,24 @@
+{
+	"application": {
+		"port": 3000
+	},
+	"logging": {
+		"enabled": true
+	},
+	"hue": {
+		"bridgeIP": "",
+		"bridgeUsername": ""
+	},
+	"users": [
+		{
+			"id": "cfb78822e5f14e078dbd9e5ed3be35a3",
+			"name": "Justin",
+			"state": "home"
+		},
+		{
+			"id": "c4bac848d6644c229b6b712630466a99",
+			"name": "Jannette",
+			"state": "home"
+		}
+	]
+}
