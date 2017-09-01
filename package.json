@@ -1,0 +1,24 @@
+{
+  "name": "hue-multi-home-away",
+  "version": "1.0.0",
+  "description": "Simple application for detecting when ALL users of a given location are away, and only then turning off the lights.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jhandfield/fuzzy-carnival.git"
+  },
+  "keywords": [
+    "hue",
+    "automation",
+    "iot"
+  ],
+  "author": "Justin Handfield",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jhandfield/fuzzy-carnival/issues"
+  },
+  "homepage": "https://github.com/jhandfield/fuzzy-carnival#readme"
+}
