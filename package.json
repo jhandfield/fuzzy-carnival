@@ -23,6 +23,7 @@
   "homepage": "https://github.com/jhandfield/fuzzy-carnival#readme",
   "dependencies": {
     "dateformat": "^2.0.0",
+    "express-winston": "^2.4.0",
     "winston": "^2.3.1"
   }
 }
