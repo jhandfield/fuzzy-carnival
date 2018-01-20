@@ -3,11 +3,13 @@
 		"port": 3000
 	},
 	"logging": {
+		"consoleLogging": true,
+		"consoleLoggingLevel": "silly",
 		"enabled": true
 	},
-	"hue": {
-		"bridgeIP": "",
-		"bridgeUsername": ""
+	"bridge": {
+		"address": "192.168.1.49",
+		"username": "PlX16CEbg1u5iyZuxc-kie1cMPDbGn0-6zaKBGge"
 	},
 	"users": [
 		{
