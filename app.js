@@ -94,6 +94,7 @@ else {
 		});
 	}
 
+	http.globalAgent.maxSockets = 5;
 	logger.info(`Application finished initializing at ${dateFormat(Date.now(), "d mmm yyyy HH:MM:ss")}, beginning normal operation.`);
 }
 
@@ -163,10 +164,17 @@ eventEmitter.on("userStateChanged", (user, oldState, newState) => {
 				// No users are home - shut lights off
 				logger.debug("All users have left - shutting lights off.");
 
+				changeLightState(1, false);
+				changeLightState(2, false);
+				changeLightState(3, false);
 				changeLightState(4, false);
+				changeLightState(5, false);
+				changeLightState(6, false);
 				changeLightState(7, false);
 				changeLightState(8, false);
 				changeLightState(9, false);
+				changeLightState(10, false);
+				changeLightState(11, false);
 			}
 	}
 	else if (oldState === "away" && newState === "home") {
@@ -210,6 +218,10 @@ function makeHueRequest(path, body) {
 	
 	const req = http.request(options, (res) => {
 		logger.silly(`Response from Hue Bridge with status code ${res.statusCode}`);
+	});
+
+	req.on("error", (e) => {
+		logger.error(`Caught error in HTTP request: ${e}`);
 	});
 
 	// Write the body
